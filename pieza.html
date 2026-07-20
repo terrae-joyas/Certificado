@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pasaporte Digital — Terrae</title>
+  <meta name="description" content="Consulta el Pasaporte Digital de tu joya Terrae: origen certificado, historia, galería, certificado y verificación en blockchain.">
+  <meta name="robots" content="noindex, follow"> <!-- cada pieza es única; se indexa vía sitemap dinámico en Fase 3 -->
+
+  <meta property="og:title" content="Pasaporte Digital — Terrae">
+  <meta property="og:description" content="Autenticidad verificable de una joya Terrae, certificada y anclada en blockchain.">
+  <meta property="og:type" content="product">
+  <meta property="og:image" content="assets/img/og-terrae.jpg">
+
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;0,600;1,500&family=Jost:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/passport.css">
+  <link rel="stylesheet" href="css/certificate.css">
+  <link rel="stylesheet" href="css/timeline.css">
+  <link rel="stylesheet" href="css/gallery.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "brand": { "@type": "Brand", "name": "Terrae" },
+    "name": "Pieza certificada Terrae",
+    "material": "Plata 925 y esmeralda colombiana"
+  }
+  </script>
+</head>
+<body data-pagina="pasaporte">
+  <a class="saltar-contenido" href="#contenido-principal">Saltar al contenido principal</a>
+
+  <header class="navbar">
+    <div class="navbar__inner">
+      <a class="navbar__logo" href="index.html" aria-label="Terrae, inicio">
+        <img src="assets/logo/terrae-isotipo-oro-negro.jpg" alt="" width="36" height="36">
+        <span class="navbar__logo-texto">Terrae</span>
+      </a>
+      <nav aria-label="Navegación principal">
+        <ul class="navbar__links" id="navbar-links">
+          <li><a href="index.html#colecciones">Colecciones</a></li>
+          <li><a href="index.html#verificar">Verificar otra joya</a></li>
+        </ul>
+      </nav>
+      <button class="navbar__menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navbar-links">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.5"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="contenido-principal">
+
+    <div role="alert" data-pasaporte-error hidden class="contenedor" style="padding-top: calc(var(--altura-navbar) + var(--space-4));"></div>
+
+    <!-- ===================== HERO DE LA PIEZA ===================== -->
+    <section class="pasaporte-hero contenedor" aria-labelledby="pieza-nombre">
+      <div class="pasaporte-hero__imagen" data-carga-pasaporte>
+        <img src="assets/img/placeholder-pieza-1.jpg" alt="Fotografía principal de la pieza" data-campo="imagen-principal">
+      </div>
+      <div>
+        <p class="pasaporte-hero__sku"><span data-campo="sku">—</span></p>
+        <h1 class="pasaporte-hero__nombre" id="pieza-nombre" data-campo="nombre">Cargando pieza…</h1>
+
+        <div class="pasaporte-hero__badges">
+          <span class="badge badge--verificado" data-campo="badge-estado">Certificada</span>
+        </div>
+
+        <div class="pasaporte-hero__esmeralda">
+          <div class="pasaporte-hero__dato">
+            <span class="pasaporte-hero__dato-label">Origen</span>
+            <span class="pasaporte-hero__dato-valor" data-campo="origen">—</span>
+          </div>
+          <div class="pasaporte-hero__dato">
+            <span class="pasaporte-hero__dato-label">Quilates</span>
+            <span class="pasaporte-hero__dato-valor" data-campo="quilates">—</span>
+          </div>
+          <div class="pasaporte-hero__dato">
+            <span class="pasaporte-hero__dato-label">Color</span>
+            <span class="pasaporte-hero__dato-valor" data-campo="color-grado">—</span>
+          </div>
+          <div class="pasaporte-hero__dato">
+            <span class="pasaporte-hero__dato-label">Metal</span>
+            <span class="pasaporte-hero__dato-valor" data-campo="metal">—</span>
+          </div>
+        </div>
+
+        <p>Peso total: <span data-campo="peso">—</span> · Tratamiento: <span data-campo="tratamiento">—</span></p>
+
+        <div class="pasaporte-hero__acciones">
+          <a class="boton boton--primario" href="#certificado">Ver certificado</a>
+          <a class="boton boton--secundario" href="#blockchain">Ver verificación blockchain</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== NAVEGACIÓN INTERNA ===================== -->
+    <nav class="pasaporte-nav" aria-label="Secciones del Pasaporte Digital">
+      <ul class="pasaporte-nav__lista">
+        <li><a href="#historia-pieza">Historia</a></li>
+        <li><a href="#galeria">Galería</a></li>
+        <li><a href="#certificado">Certificado</a></li>
+        <li><a href="#timeline">Trazabilidad</a></li>
+        <li><a href="#blockchain">Blockchain</a></li>
+        <li><a href="#garantia">Garantía</a></li>
+        <li><a href="#propietario">Propietario</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+      </ul>
+    </nav>
+
+    <!-- ===================== HISTORIA DE LA PIEZA ===================== -->
+    <section class="seccion seccion--compacta" id="historia-pieza" aria-labelledby="historia-pieza-titulo">
+      <div class="contenedor pasaporte-historia revelar">
+        <span class="eyebrow">Historia de esta pieza</span>
+        <h2 id="historia-pieza-titulo">Nacida en las vetas de Muzo</h2>
+        <p>Esta esmeralda fue extraída y seleccionada bajo los más altos estándares gemológicos, analizada por el motor de clasificación de EmeraldChain y validada por un auditor certificado COPNIA antes de convertirse en una pieza Terrae.</p>
+      </div>
+    </section>
+
+    <!-- ===================== GALERÍA ===================== -->
+    <section class="seccion seccion--compacta" id="galeria" aria-labelledby="galeria-titulo">
+      <div class="contenedor">
+        <span class="eyebrow">Galería</span>
+        <h2 id="galeria-titulo">Fotografía, video y microscopía</h2>
+        <div class="galeria" data-componente="galeria" data-carga-pasaporte></div>
+      </div>
+    </section>
+
+    <!-- ===================== CERTIFICADO ===================== -->
+    <section class="seccion seccion--compacta" id="certificado" aria-labelledby="certificado-titulo">
+      <div class="contenedor">
+        <span class="eyebrow">Certificado digital</span>
+        <h2 id="certificado-titulo">Certificado de autenticidad</h2>
+
+        <div class="certificado">
+          <div class="certificado__cabecera">
+            <img class="certificado__logo" src="assets/logo/terrae-logo-fondo-blanco.jpg" alt="Terrae">
+            <div class="certificado__numero">
+              N.° <span data-campo="numero-certificado">—</span><br>
+              Emitido: <span data-campo="fecha-emision">—</span>
+            </div>
+          </div>
+
+          <h3 class="certificado__titulo">Certificado de Autenticidad y Origen</h3>
+
+          <div class="certificado__datos">
+            <div><span class="certificado__dato-label">Origen predicho</span><span data-campo="origen">—</span></div>
+            <div><span class="certificado__dato-label">Quilates</span><span data-campo="quilates">—</span></div>
+            <div><span class="certificado__dato-label">Grado de color</span><span data-campo="color-grado">—</span></div>
+            <div><span class="certificado__dato-label">Tratamiento</span><span data-campo="tratamiento">—</span></div>
+          </div>
+
+          <div class="certificado__pie">
+            <div>
+              <p class="certificado__firma">Terrae Gemological Board</p>
+              <p class="certificado__hash">SHA-256: <span data-campo="hash-certificado">—</span></p>
+            </div>
+            <img class="certificado__qr" src="assets/icons/qr-placeholder.svg" alt="Código QR de verificación de esta pieza">
+          </div>
+        </div>
+
+        <div class="certificado__descargar">
+          <a class="boton boton--secundario" data-campo="descargar-pdf" href="#" target="_blank" rel="noopener">Descargar certificado en PDF</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== TIMELINE / TRAZABILIDAD ===================== -->
+    <section class="seccion seccion--compacta" id="timeline" aria-labelledby="timeline-titulo">
+      <div class="contenedor">
+        <span class="eyebrow">Trazabilidad</span>
+        <h2 id="timeline-titulo">Cadena de custodia y mantenimiento</h2>
+        <ol class="timeline" data-componente="timeline" data-carga-pasaporte></ol>
+      </div>
+    </section>
+
+    <!-- ===================== BLOCKCHAIN ===================== -->
+    <section class="seccion seccion--compacta" id="blockchain" aria-labelledby="blockchain-titulo">
+      <div class="contenedor">
+        <span class="eyebrow">Verificación blockchain</span>
+        <h2 id="blockchain-titulo">Anclaje inmutable en Polygon</h2>
+
+        <div class="sello-blockchain" data-componente="sello-blockchain" data-estado="verificando">
+          <svg class="sello-blockchain__icono" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 3 6v6c0 5 4 8.5 9 10 5-1.5 9-5 9-10V6l-9-4Z" stroke="currentColor" stroke-width="1.3"/></svg>
+          <span data-sello-texto>Verificando en blockchain…</span>
+        </div>
+
+        <div class="bloque-blockchain" style="margin-top: var(--space-3);">
+          <div class="bloque-blockchain__campo">
+            <span class="etiqueta">Transacción</span>
+            <p><a class="dato-tecnico" data-campo="enlace-blockchain" href="#" target="_blank" rel="noopener"><span data-campo="tx-hash">—</span></a></p>
+          </div>
+          <div class="bloque-blockchain__campo">
+            <span class="etiqueta">CID en IPFS</span>
+            <p class="dato-tecnico" data-campo="cid-ipfs">—</p>
+          </div>
+          <div class="bloque-blockchain__campo">
+            <span class="etiqueta">Red</span>
+            <p>Polygon Mainnet</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== GARANTÍA ===================== -->
+    <section class="seccion seccion--compacta" id="garantia" aria-labelledby="garantia-titulo">
+      <div class="contenedor">
+        <span class="eyebrow">Garantía</span>
+        <h2 id="garantia-titulo">Cobertura de tu pieza</h2>
+        <div class="garantia-card">
+          <div class="garantia-card__item">
+            <div class="garantia-card__valor" data-campo="garantia-cobertura">—</div>
+            <div class="garantia-card__label">Cobertura</div>
+          </div>
+          <div class="garantia-card__item">
+            <div class="garantia-card__valor" data-campo="garantia-inicio">—</div>
+            <div class="garantia-card__label">Inicio</div>
+          </div>
+          <div class="garantia-card__item">
+            <div class="garantia-card__valor" data-campo="garantia-fin">—</div>
+            <div class="garantia-card__label">Vence</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PROPIETARIO ===================== -->
+    <section class="seccion seccion--compacta" id="propietario" aria-labelledby="propietario-titulo">
+      <div class="contenedor">
+        <span class="eyebrow">Titularidad</span>
+        <h2 id="propietario-titulo">Registro del propietario</h2>
+
+        <div class="propietario-panel" data-estado="sin-sesion" data-joya-id="demo-id">
+          <div class="propietario-panel__texto propietario-panel__solo-anonimo">
+            <p>Si acabas de adquirir esta pieza, inicia sesión para registrar tu titularidad en el Pasaporte Digital.</p>
+          </div>
+          <button class="boton boton--secundario propietario-panel__solo-anonimo" data-accion="reclamar-pieza" type="button">Registrar mi titularidad</button>
+
+          <form class="propietario-panel__texto propietario-panel__solo-autenticado" data-form="registrar-propietario">
+            <div class="campo">
+              <label class="campo__label" for="nombreCompleto">Nombre completo</label>
+              <input class="campo__input" id="nombreCompleto" name="nombreCompleto" type="text" required>
+            </div>
+            <div class="campo">
+              <label class="campo__label" for="tipoAdquisicion">Tipo de adquisición</label>
+              <select class="campo__select" id="tipoAdquisicion" name="tipoAdquisicion" required>
+                <option value="compra">Compra</option>
+                <option value="herencia">Herencia</option>
+                <option value="transferencia">Transferencia</option>
+              </select>
+            </div>
+            <button class="boton boton--primario" type="submit">Registrar titularidad</button>
+            <p data-mensaje hidden></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SERVICIOS / MANTENIMIENTO ===================== -->
+    <section class="seccion seccion--compacta" id="servicios" aria-labelledby="servicios-titulo">
+      <div class="contenedor">
+        <span class="eyebrow">Servicios</span>
+        <h2 id="servicios-titulo">Cuida tu pieza Terrae</h2>
+        <div class="servicios-grid">
+          <div class="servicio-card card">
+            <svg class="servicio-card__icono" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4h16v16H4V4Z" stroke="currentColor" stroke-width="1.2"/></svg>
+            <h3>Limpieza profesional</h3>
+            <p class="campo__ayuda">Agenda una limpieza en taller autorizado.</p>
+          </div>
+          <div class="servicio-card card">
+            <svg class="servicio-card__icono" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="1.2"/></svg>
+            <h3>Ajuste y reparación</h3>
+            <p class="campo__ayuda">Solicita ajuste de talla o reparación de engaste.</p>
+          </div>
+          <div class="servicio-card card">
+            <svg class="servicio-card__icono" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 3 7l9 5 9-5-9-5Z" stroke="currentColor" stroke-width="1.2"/></svg>
+            <h3>Recertificación</h3>
+            <p class="campo__ayuda">Actualiza el estado gemológico de tu pieza.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== NFT (oculto hasta Fase 6) ===================== -->
+    <section class="seccion seccion--compacta seccion-nft" id="nft" aria-labelledby="nft-titulo" hidden>
+      <div class="contenedor" style="text-align:center;">
+        <span class="eyebrow">Edición digital</span>
+        <h2 id="nft-titulo">NFT de esta pieza</h2>
+        <p>Función disponible próximamente.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Lightbox global -->
+  <div class="lightbox" aria-hidden="true">
+    <button class="lightbox__anterior" aria-label="Imagen anterior">‹</button>
+    <div class="lightbox__contenido"></div>
+    <button class="lightbox__siguiente" aria-label="Imagen siguiente">›</button>
+    <button class="lightbox__cerrar" aria-label="Cerrar galería">✕</button>
+    <span class="lightbox__contador"></span>
+  </div>
+
+  <footer class="footer">
+    <div class="contenedor">
+      <div class="footer__bottom">
+        <span>© <span data-anio-actual>2026</span> Terrae.</span>
+        <a href="index.html">Volver al inicio</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/app.js" defer></script>
+  <script src="js/api.js" defer></script>
+  <script src="js/passport.js" defer></script>
+  <script src="js/gallery.js" defer></script>
+  <script src="js/timeline.js" defer></script>
+  <script src="js/blockchain.js" defer></script>
+  <script src="js/owner.js" defer></script>
+</body>
+</html>
