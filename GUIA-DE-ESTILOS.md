@@ -1,93 +1,72 @@
-# Terrae — Guía de Estilos
+# Terrae — Guía de Módulos del Centro de Operaciones
 
-Sistema de diseño derivado exclusivamente del logotipo oficial Terrae. Ningún color o tipografía ajenos a lo aquí documentado debe introducirse en ninguna página o componente.
+Cada módulo es un archivo independiente en `js/admin-modules/`, registrado en el router del shell (`js/admin-app.js`) vía `BO.registrarModulo(clave, { montar(contenedor) })`. La navegación es por hash (`#/dashboard`, `#/joyas`, etc.), lo que permite enlazar directamente a un módulo y mantiene el back office como una app de una sola página sin frameworks.
 
----
+| # | Módulo | Archivo | Ruta |
+|---|---|---|---|
+| 1 | Dashboard Ejecutivo | `dashboard.js` | `#/dashboard` |
+| 2 | Gestión de Joyas | `joyas.js` | `#/joyas` |
+| 3 | Gestión de Esmeraldas | `esmeraldas.js` | `#/esmeraldas` |
+| 4 | (Generación de ID) | integrado en `admin-api.js` | — |
+| 5 | (Generador de QR) | integrado en `admin-api.js` + `joyas.js` | — |
+| 6 | (Generador de Certificado PDF) | integrado en `admin-api.js` + `joyas.js` | — |
+| 7 | Gestión Blockchain | `blockchain-admin.js` | `#/blockchain` |
+| 8 | Gestión de Propietarios | `propietarios.js` | `#/propietarios` |
+| 9 | Gestión de Garantías | `garantias.js` | `#/garantias` |
+| 10 | Gestión de Mantenimientos | `mantenimientos.js` | `#/mantenimientos` |
+| 11 | Gestión Multimedia | `multimedia.js` | `#/multimedia` |
+| 12 | Usuarios y Roles | `usuarios.js` | `#/usuarios` |
+| 13 | Auditoría | `auditoria.js` | `#/auditoria` |
+| 14 | Configuración | `configuracion.js` | `#/configuracion` |
 
-## 1. Principio rector: Lujo Silencioso
-
-La interfaz de Terrae nunca debe sentirse como un producto "tech". Cada decisión visual se evalúa contra estas cuatro preguntas:
-
-1. ¿Un maestro joyero reconocería esto como parte de su oficio?
-2. ¿Hay espacio en blanco suficiente para que la pieza (o el dato) respire?
-3. ¿La animación tiene un propósito narrativo, o es decoración repetida?
-4. ¿Esto se vería igual de bien impreso en un certificado físico?
-
-Si la respuesta a alguna es "no", se revisa el componente.
-
----
-
-## 2. Color
-
-| Token | Hex | Rol |
-|---|---|---|
-| `--terrae-verde-950` | `#0E3B2E` | Primario — fondos de marca, botones primarios |
-| `--terrae-oro-500` | `#B8935A` | Secundario — bordes, acentos, tipografía de marca |
-| `--terrae-nogal-950` | `#1A1410` | Fondo base de toda la interfaz |
-| `--terrae-marfil-100` | `#F3EDE0` | Texto principal sobre fondo oscuro |
-| `--terrae-esmeralda-500` | `#0F9D63` | Resaltado — verificación, éxito, CTAs críticos |
-
-**Reglas:**
-- El certificado (`.certificado`) es la única superficie que invierte fondo/texto (Marfil sobre el que se lee en Nogal) — replica el papel físico.
-- Nunca usar azul, rojo saturado, morado o gris frío. Los estados de error usan rojo óxido (`#7A2E2E`), nunca rojo semáforo.
-- El Oro Satinado nunca compite visualmente con el Verde Terrae: el oro enmarca, el verde ancla.
+Los módulos 4, 5 y 6 del prompt original no son pantallas independientes: son **comportamientos automáticos** disparados desde el módulo Joyas (`AdminAPI.joyas.crear()` genera ID + QR; `AdminAPI.joyas.aprobarCertificado()` genera el certificado). Esto evita una pantalla vacía sin propósito propio y mantiene la generación donde el usuario la espera: en el flujo natural de registrar/aprobar una pieza.
 
 ---
 
-## 3. Tipografía
+## 1. Dashboard Ejecutivo
 
-| Familia | Rol | Peso típico |
-|---|---|---|
-| Cormorant Garamond | Titulares, storytelling, certificado | 300–600, itálica para acentos narrativos |
-| Jost | UI funcional, cuerpo de texto, botones | 300–500 |
-| JetBrains Mono | Datos técnicos: hash, tx_hash, SKU, fechas de sistema | 400–500 |
+**Qué hace:** calcula 10 indicadores en tiempo real a partir de `AdminAPI.dashboard.obtenerIndicadores()` (total de joyas, disponibles, vendidas, certificados, QR, registros blockchain, garantías activas, mantenimientos, pendientes de certificación, valor de inventario) y una lista de actividad reciente tomada directamente del log de auditoría.
 
-**Escala** (variables en `style.css`): `--text-display-xl` (64px aprox.) → `--text-mono` (13px). Todos los tamaños usan `clamp()` donde aplica para fluidez entre breakpoints sin medias queries adicionales.
+**Gráficos:** el bloque `.bo-grafico-barras` es SVG/CSS puro, sin librerías. Está diseñado para ser reemplazado por Chart.js, D3 o Recharts cuando el backend exponga una serie temporal real (`GET /dashboard/series`); el contenedor y el markup no necesitan cambiar.
 
-**Regla de contraste tipográfico deliberado:** cualquier dato verificable (hash, número de certificado, timestamp) se presenta siempre en JetBrains Mono, incluso dentro de un párrafo en Jost — la fuente monoespaciada es la señal visual de "esto es un dato, no prosa de marca".
+## 2. Gestión de Joyas
 
----
+**Qué hace:** CRUD completo con drawer lateral (crear/editar/consultar), tabla con búsqueda y filtro por estado, y dos acciones especiales: **Aprobar certificado** (✓) y **Archivar** (🗄). Los campos cubren todos los mínimos pedidos: ID, colección, nombre, descripción, tipo, metal, peso, dimensiones, esmeralda asociada, estado, precio, moneda, fotografías/videos (uploader), certificado, observaciones.
 
-## 4. Espaciado
+**Automatizaciones:** al crear, `AdminAPI.joyas.crear()` genera el ID único (módulo 4) y el QR (módulo 5) sin intervención del usuario. Al aprobar, `AdminAPI.joyas.aprobarCertificado()` genera el certificado con hash simulado (módulo 6).
 
-Escala de 8px: `--space-1` (8px) a `--space-8` (128px). El mínimo aceptable de aire alrededor de un bloque de contenido de marca es `--space-3` (24px) — nunca menos, incluso en mobile.
+## 3. Gestión de Esmeraldas
 
----
+**Qué hace:** registro independiente de la gema, con todos los campos gemológicos (mina, municipio, departamento, país, peso, color, claridad, corte, tratamientos, inclusiones, fotos microscópicas, estado). El campo "Informe SIEGEM LAB" se muestra deshabilitado con la leyenda "No sincronizado — integración futura", preparado para recibir un ID real sin requerir cambios de esquema.
 
-## 5. Bordes, sombras y radios
+## 7. Gestión Blockchain
 
-- Radio máximo: `--radius-md` (4px). Nunca `border-radius` grande tipo "pill" salvo en `.badge` (círculo/píldora, por convención de indicador de estado, no de botón).
-- Borde de marca estándar: `1px solid rgba(184, 147, 90, 0.35)` (`--borde-oro`), se intensifica a opaco en hover/focus.
-- Sombras: siempre suaves y tibias (`--sombra-suave`, con tinte verde, no negro puro) — nunca `box-shadow` gris de Material Design.
+**Qué hace:** formulario para registrar manualmente hash, wallet, smart contract, bloque y gas por pieza, más un botón "Consultar estado" que hoy solo simula la respuesta. **Ningún registro pasa a "verificado" automáticamente** — esa es una regla de seguridad deliberada: solo la integración real con Polygon (Fase 5) puede confirmar un anclaje.
 
----
+## 8. Gestión de Propietarios
 
-## 6. Movimiento
+**Qué hace:** selecciona una pieza y muestra su historial completo de titularidad (nombre, país, ciudad, tipo de adquisición, vigencia). Registrar una nueva transferencia cierra automáticamente el registro vigente anterior. **Esta información nunca debe copiarse a otros módulos ni exponerse públicamente** — ver la regla de privacidad en `docs/FLUJO-DE-DATOS.md` (Fase 3).
 
-- Duración estándar: 400–600ms (`--duracion-estandar`), easing `cubic-bezier(0.4, 0, 0.2, 1)`.
-- Transiciones de color/borde en hover, nunca `scale()` en botones.
-- Scroll reveal: fade + traslado vertical de 24px, una sola vez por elemento.
-- El único momento de animación con significado narrativo explícito es el "revelado" del sello de verificación blockchain — todo lo demás es sutil y funcional, no espectáculo.
-- `prefers-reduced-motion: reduce` se respeta globalmente (ver `style.css`, sección 7).
+## 9. Gestión de Garantías
 
----
+**Qué hace:** activación (cobertura + fecha de vencimiento), renovación, y cálculo de estado vigente/vencida comparando la fecha de vencimiento con la fecha actual del navegador.
 
-## 7. Iconografía
+## 10. Gestión de Mantenimientos
 
-SVG lineales de 1.2–1.5px de grosor de trazo, sin relleno sólido salvo puntos de estado. No se usan librerías de íconos genéricas (Feather, Material Icons) — cada ícono se dibuja a medida para mantener coherencia con el trazo del logotipo.
+**Qué hace:** vista global (no por pieza) de todos los servicios realizados en el taller, con carga de fotografías antes/después y documentos. Complementa al historial que el cliente ve en su Pasaporte Digital (Fase 3): aquí el técnico/administrador registra, allá el cliente consulta.
 
----
+## 11. Gestión Multimedia
 
-## 8. Fotografía
+**Qué hace:** panel de solo lectura que resume cuánto material tiene cada pieza (fotos, videos, certificado, QR). La carga real de archivos ocurre en el punto de uso (formularios de Joyas, Esmeraldas, Mantenimientos) para mantener la organización automática por ID de pieza — este módulo es el "índice", no un cajón desordenado de archivos sueltos.
 
-- Editorial, luz natural, nunca fondo blanco de e-commerce genérico.
-- Las imágenes placeholder incluidas en `assets/img/` marcan explícitamente su carácter temporal ("Placeholder — reemplazar por fotografía editorial de marca") y deben sustituirse antes de producción.
+## 12. Usuarios y Roles
 
----
+**Qué hace:** listado de usuarios con cambio de rol en línea y activar/desactivar, más una matriz de permisos visual de los 7 roles del prompt (Super Admin, Admin, Gemólogo, Diseñador, Operador, Consultor, Auditor) contra las acciones críticas del sistema.
 
-## 9. Voz y tono del contenido (copy)
+## 13. Auditoría
 
-- Verbos en modo activo e imperativo cortés: "Registra tu titularidad", no "Puede registrar su titularidad si lo desea".
-- Los errores nunca se disculpan ni son vagos: "No fue posible registrar la pieza. Intenta de nuevo." — nunca "Oops, algo salió mal 😅".
-- Los datos técnicos (hash, tx_hash) nunca se traducen ni se paran-frasean — se muestran tal cual, en `--font-mono`.
-- El slogan de marca ("Lo que la tierra esconde, Terrae lo revela") se usa como cierre narrativo, no como relleno repetido en cada sección.
+**Qué hace:** tabla de solo lectura, filtrable por entidad, de **todos** los eventos registrados automáticamente por `AdminAPI` (usuario, acción, entidad, fecha/hora). La columna IP muestra "Disponible con backend real" porque el cliente nunca puede capturar su propia IP de forma confiable — eso corresponde al servidor.
+
+## 14. Configuración
+
+**Qué hace:** numeración de joyas (prefijo, formato, secuencial), plantilla e idiomas de certificados, nota informativa de configuración QR, red blockchain predeterminada, idiomas/monedas/impuestos (solo lectura en esta fase), e identidad visual (siempre solo lectura — los tokens de marca de la Fase 0 no se editan desde el Back Office).

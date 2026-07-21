@@ -1,266 +1,380 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terrae — Alta joyería colombiana de esmeraldas | Lo que la tierra esconde, Terrae lo revela</title>
-  <meta name="description" content="Terrae es una marca colombiana de alta joyería en esmeraldas y plata, con trazabilidad digital certificada de cada pieza: origen, artesanía y autenticidad verificable en blockchain.">
+/**
+ * TERRAE — admin-app.js (Fase 4 — Centro de Operaciones Terrae)
+ * -----------------------------------------------------------------------
+ * Shell de la aplicación: registro de módulos, enrutamiento por hash
+ * (#/joyas, #/esmeraldas...), sidebar, buscador global, y la librería de
+ * componentes reutilizables que todos los módulos comparten (BO.*):
+ * Toast, Drawer (formulario lateral), Confirm, DataTable, Uploader,
+ * escapeHtml (protección XSS) y validadores comunes.
+ * -----------------------------------------------------------------------
+ */
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="Terrae — Lo que la tierra esconde, Terrae lo revela">
-  <meta property="og:description" content="Alta joyería colombiana en esmeraldas con Pasaporte Digital certificado y verificable en blockchain.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/img/og-terrae.jpg">
-  <meta property="og:url" content="https://terrae.com/">
-  <meta property="og:locale" content="es_CO">
+const BO = (() => {
+  const modulosRegistrados = {};
+  let vistaActual = null;
 
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Terrae — Alta joyería colombiana de esmeraldas">
-  <meta name="twitter:description" content="Lo que la tierra esconde, Terrae lo revela.">
-  <meta name="twitter:image" content="assets/img/og-terrae.jpg">
-
-  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
-  <link rel="manifest" href="manifest.json">
-  <link rel="canonical" href="https://terrae.com/">
-
-  <!-- Performance: preconnect a Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;0,600;1,500&family=Jost:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-  <!-- Preload del hero para LCP -->
-  <link rel="preload" as="image" href="assets/img/hero-poster.jpg">
-
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/landing.css">
-  <link rel="stylesheet" href="css/gallery.css">
-  <link rel="stylesheet" href="css/responsive.css">
-
-  <!-- Schema.org: Organization -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Terrae",
-    "slogan": "Lo que la tierra esconde, Terrae lo revela",
-    "url": "https://terrae.com",
-    "logo": "https://terrae.com/assets/logo/terrae-logo-fondo-negro.jpg",
-    "sameAs": []
+  /* -----------------------------------------------------------------------
+     REGISTRO Y ENRUTAMIENTO DE MÓDULOS
+     ----------------------------------------------------------------------- */
+  function registrarModulo(clave, definicion) {
+    modulosRegistrados[clave] = definicion; // { montar(contenedor), desmontar?() }
   }
-  </script>
-</head>
-<body data-pagina="landing">
-  <a class="saltar-contenido" href="#contenido-principal">Saltar al contenido principal</a>
 
-  <!-- ===================== NAVBAR ===================== -->
-  <header class="navbar">
-    <div class="navbar__inner">
-      <a class="navbar__logo" href="index.html" aria-label="Terrae, inicio">
-        <img src="assets/logo/terrae-isotipo-oro-negro.jpg" alt="" width="36" height="36">
-        <span class="navbar__logo-texto">Terrae</span>
-      </a>
-      <nav aria-label="Navegación principal">
-        <ul class="navbar__links" id="navbar-links">
-          <li><a href="index.html#historia">Historia</a></li>
-          <li><a href="index.html#colecciones">Colecciones</a></li>
-          <li><a href="index.html#filosofia">Filosofía</a></li>
-          <li><a href="index.html#verificar">Verificar joya</a></li>
-          <li><a href="login.html">Acceso taller</a></li>
-        </ul>
-      </nav>
-      <button class="navbar__menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navbar-links">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.5"/></svg>
-      </button>
-    </div>
-  </header>
+  function irA(clave) {
+    window.location.hash = `#/${clave}`;
+  }
 
-  <main id="contenido-principal">
-    <!-- ===================== HERO CINEMATOGRÁFICO ===================== -->
-    <section class="hero" aria-label="Presentación de la marca Terrae">
-      <!-- Punto de integración: reemplazar por el video de marca definitivo.
-           poster garantiza una primera pintura significativa sin depender del video. -->
-      <video class="hero__video" autoplay muted loop playsinline poster="assets/img/hero-poster.jpg" aria-hidden="true">
-        <source src="assets/video/hero-terrae.mp4" type="video/mp4">
-      </video>
-      <div class="hero__overlay"></div>
+  function resolverRutaActual() {
+    const hash = window.location.hash.replace('#/', '') || 'dashboard';
+    return modulosRegistrados[hash] ? hash : 'dashboard';
+  }
 
-      <div class="hero__contenido">
-        <img class="hero__isotipo" src="assets/logo/terrae-isotipo-oro-negro.jpg" alt="" width="96" height="96">
-        <h1 class="hero__marca">TERRAE</h1>
-        <p class="hero__slogan">Lo que la tierra esconde, Terrae lo revela</p>
-        <div class="hero__acciones">
-          <a class="boton boton--primario" href="index.html#colecciones">Explorar colección</a>
-          <a class="boton boton--secundario" href="index.html#verificar">Verificar una joya</a>
-        </div>
-      </div>
+  async function renderizarRuta() {
+    const clave = resolverRutaActual();
+    if (vistaActual && modulosRegistrados[vistaActual]?.desmontar) {
+      modulosRegistrados[vistaActual].desmontar();
+    }
+    vistaActual = clave;
 
-      <div class="hero__scroll-indicador" aria-hidden="true">
-        <span>Descubrir</span>
-        <span class="hero__scroll-linea"></span>
-      </div>
-    </section>
+    document.querySelectorAll('.bo-nav__link').forEach((link) => {
+      link.setAttribute('aria-current', String(link.dataset.modulo === clave));
+    });
 
-    <!-- ===================== HISTORIA / STORYTELLING ===================== -->
-    <section class="seccion" id="historia" aria-labelledby="historia-titulo">
-      <div class="contenedor">
-        <div class="historia__intro revelar">
-          <span class="eyebrow">Nuestra historia</span>
-          <h2 id="historia-titulo">De las entrañas de la tierra a tus manos</h2>
-        </div>
+    const contenedor = document.getElementById('bo-contenido-vista');
+    contenedor.setAttribute('aria-busy', 'true');
+    try {
+      await modulosRegistrados[clave].montar(contenedor);
+    } catch (error) {
+      contenedor.innerHTML = `<p role="alert">No fue posible cargar este módulo. ${escapeHtml(error.message || '')}</p>`;
+      console.error('[BO]', error);
+    } finally {
+      contenedor.setAttribute('aria-busy', 'false');
+    }
+  }
 
-        <div class="historia__actos">
-          <article class="acto revelar">
-            <span class="acto__numero" aria-hidden="true">01</span>
-            <div>
-              <h3 class="acto__titulo">Formación geológica</h3>
-              <p class="acto__texto">Hace millones de años, en las vetas de Muzo y Chivor, fluidos hidrotermales cargados de berilio y cromo dieron origen al verde más codiciado del planeta: la esmeralda colombiana, reconocible por su inclusión trifásica única en el mundo.</p>
-            </div>
-          </article>
+  function inicializarRouter() {
+    window.addEventListener('hashchange', renderizarRuta);
+    renderizarRuta();
+  }
 
-          <article class="acto revelar">
-            <span class="acto__numero" aria-hidden="true">02</span>
-            <div>
-              <h3 class="acto__titulo">Selección</h3>
-              <p class="acto__texto">Cada gema es evaluada por criterios gemológicos estrictos: color, transparencia, inclusiones y origen. Solo una fracción mínima de la producción alcanza el estándar Terrae.</p>
-            </div>
-          </article>
+  /* -----------------------------------------------------------------------
+     SANITIZACIÓN — protección XSS obligatoria antes de insertar cualquier
+     dato en innerHTML. Todo módulo debe pasar por aquí cualquier campo
+     que provenga de un formulario o de AdminAPI antes de imprimirlo.
+     ----------------------------------------------------------------------- */
+  function escapeHtml(valor) {
+    if (valor === null || valor === undefined) return '';
+    return String(valor)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
 
-          <article class="acto revelar">
-            <span class="acto__numero" aria-hidden="true">03</span>
-            <div>
-              <h3 class="acto__titulo">Artesanía</h3>
-              <p class="acto__texto">Maestros joyeros colombianos engastan cada esmeralda en plata 925, con técnicas heredadas y un respeto absoluto por la piedra: la forma sirve a la gema, nunca al revés.</p>
-            </div>
-          </article>
+  /* -----------------------------------------------------------------------
+     TOASTS
+     ----------------------------------------------------------------------- */
+  function toast(mensaje, tipo = 'exito') {
+    const contenedor = document.getElementById('bo-toasts');
+    const el = document.createElement('div');
+    el.className = `bo-toast bo-toast--${tipo}`;
+    el.setAttribute('role', 'status');
+    el.textContent = mensaje;
+    contenedor.appendChild(el);
+    setTimeout(() => el.remove(), 4500);
+  }
 
-          <article class="acto revelar">
-            <span class="acto__numero" aria-hidden="true">04</span>
-            <div>
-              <h3 class="acto__titulo">Certificación</h3>
-              <p class="acto__texto">Análisis con inteligencia artificial y validación gemológica humana generan un certificado digital único, anclado en blockchain e inalterable desde el instante de su emisión.</p>
-            </div>
-          </article>
-
-          <article class="acto revelar">
-            <span class="acto__numero" aria-hidden="true">05</span>
-            <div>
-              <h3 class="acto__titulo">Legado</h3>
-              <p class="acto__texto">Cada pieza Terrae lleva su Pasaporte Digital: una historia viva que documenta a sus propietarios, su cuidado y su procedencia — para transmitirse, generación tras generación, con la verdad intacta.</p>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== COLECCIONES ===================== -->
-    <section class="seccion" id="colecciones" aria-labelledby="colecciones-titulo">
-      <div class="contenedor">
-        <div class="historia__intro revelar">
-          <span class="eyebrow">Colecciones</span>
-          <h2 id="colecciones-titulo">Piezas con historia propia</h2>
-        </div>
-
-        <!-- data-fuente="api": gallery.js reemplaza este contenido con
-             TerraeAPI.obtenerCatalogo() (mock hoy, /catalogo en Fase 3+) -->
-        <div class="colecciones__grid" data-componente="colecciones-grid" data-fuente="api" aria-busy="true">
-          <div class="skeleton" style="aspect-ratio: 3/4;"></div>
-          <div class="skeleton" style="aspect-ratio: 3/4;"></div>
-          <div class="skeleton" style="aspect-ratio: 3/4;"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== FILOSOFÍA ===================== -->
-    <section class="seccion filosofia" id="filosofia" aria-labelledby="filosofia-titulo">
-      <div class="contenedor">
-        <div class="historia__intro revelar">
-          <span class="eyebrow">Filosofía</span>
-          <h2 id="filosofia-titulo">Tecnología discreta, raíces profundas</h2>
-        </div>
-
-        <div class="filosofia__grid">
-          <div class="filosofia__item revelar">
-            <svg class="filosofia__icono" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 3 7l9 5 9-5-9-5Z" stroke="currentColor" stroke-width="1.2"/><path d="M3 12l9 5 9-5M3 17l9 5 9-5" stroke="currentColor" stroke-width="1.2"/></svg>
-            <h3 class="filosofia__titulo">Sostenibilidad</h3>
-            <p class="filosofia__texto">Cada certificado documenta la cadena de custodia completa de la gema, reduciendo la opacidad histórica del mercado esmeraldero.</p>
+  /* -----------------------------------------------------------------------
+     CONFIRM — reemplaza confirm() nativo con un modal de marca
+     ----------------------------------------------------------------------- */
+  function confirmar({ titulo, texto, textoConfirmar = 'Confirmar', peligroso = false }) {
+    return new Promise((resolve) => {
+      const overlay = document.getElementById('bo-confirm-overlay');
+      overlay.innerHTML = `
+        <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="bo-confirm-titulo">
+          <h2 id="bo-confirm-titulo">${escapeHtml(titulo)}</h2>
+          <p>${escapeHtml(texto)}</p>
+          <div class="bo-confirm__acciones">
+            <button class="boton boton--secundario" data-accion="cancelar" type="button">Cancelar</button>
+            <button class="boton ${peligroso ? 'boton--secundario' : 'boton--esmeralda'}" data-accion="confirmar" type="button">${escapeHtml(textoConfirmar)}</button>
           </div>
-          <div class="filosofia__item revelar">
-            <svg class="filosofia__icono" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11Z" stroke="currentColor" stroke-width="1.2"/></svg>
-            <h3 class="filosofia__titulo">Minería responsable</h3>
-            <p class="filosofia__texto">Trabajamos con socios que cumplen estándares ambientales y sociales verificables en las regiones de Muzo y Chivor.</p>
-          </div>
-          <div class="filosofia__item revelar">
-            <svg class="filosofia__icono" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20h16M6 20V10l6-6 6 6v10" stroke="currentColor" stroke-width="1.2"/></svg>
-            <h3 class="filosofia__titulo">Artesanía</h3>
-            <p class="filosofia__texto">Talleres colombianos con oficio transmitido por generaciones, nunca producción en masa.</p>
-          </div>
-          <div class="filosofia__item revelar">
-            <svg class="filosofia__icono" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" stroke="currentColor" stroke-width="1.2"/></svg>
-            <h3 class="filosofia__titulo">Innovación</h3>
-            <p class="filosofia__texto">IA de clasificación gemológica y anclaje blockchain al servicio de una promesa muy antigua: decir la verdad sobre lo que se vende.</p>
-          </div>
+        </div>`;
+      overlay.classList.add('esta-abierto');
+
+      const cerrar = (resultado) => {
+        overlay.classList.remove('esta-abierto');
+        overlay.innerHTML = '';
+        resolve(resultado);
+      };
+      overlay.querySelector('[data-accion="cancelar"]').addEventListener('click', () => cerrar(false));
+      overlay.querySelector('[data-accion="confirmar"]').addEventListener('click', () => cerrar(true));
+    });
+  }
+
+  /* -----------------------------------------------------------------------
+     DRAWER — panel lateral reutilizable para crear/editar registros
+     ----------------------------------------------------------------------- */
+  function abrirDrawer({ titulo, cuerpoHTML, alGuardar, textoGuardar = 'Guardar' }) {
+    const overlay = document.getElementById('bo-drawer-overlay');
+    overlay.innerHTML = `
+      <div class="bo-drawer" role="dialog" aria-modal="true" aria-labelledby="bo-drawer-titulo">
+        <div class="bo-drawer__cabecera">
+          <h2 id="bo-drawer-titulo" style="margin:0;font-size:1.1rem;">${escapeHtml(titulo)}</h2>
+          <button class="modal__cerrar" data-accion="cerrar-drawer" type="button" aria-label="Cerrar" style="position:static;">✕</button>
         </div>
-      </div>
-    </section>
-
-    <!-- ===================== VERIFICAR UNA JOYA ===================== -->
-    <section class="seccion verificacion-cta" id="verificar" aria-labelledby="verificar-titulo">
-      <div class="contenedor">
-        <span class="eyebrow">Pasaporte Digital</span>
-        <h2 id="verificar-titulo">Verifica la autenticidad de tu joya</h2>
-        <p>Ingresa el código de tu certificado o escanea el QR grabado en tu pieza.</p>
-        <form class="verificacion-cta__form" action="pieza.html" method="get">
-          <label class="visualmente-oculto" for="codigo-verificacion">Código del certificado</label>
-          <input class="campo__input" id="codigo-verificacion" name="codigo" type="text" placeholder="Ej. demo-alma-muzo" required>
-          <button class="boton boton--esmeralda" type="submit">Verificar</button>
-        </form>
-      </div>
-    </section>
-  </main>
-
-  <!-- ===================== FOOTER ===================== -->
-  <footer class="footer">
-    <div class="contenedor">
-      <div class="footer__grid">
-        <div>
-          <div class="footer__marca">Terrae</div>
-          <p class="footer__slogan">Lo que la tierra esconde,<br>Terrae lo revela.</p>
+        <div class="bo-drawer__cuerpo">
+          <form id="bo-drawer-form">${cuerpoHTML}</form>
         </div>
-        <nav aria-label="Redes sociales">
-          <div class="footer__titulo">Redes</div>
-          <ul class="footer__links">
-            <li><a href="#" rel="noopener">Instagram</a></li>
-            <li><a href="#" rel="noopener">Pinterest</a></li>
-            <li><a href="#" rel="noopener">LinkedIn</a></li>
-          </ul>
-        </nav>
-        <nav aria-label="Contacto">
-          <div class="footer__titulo">Contacto</div>
-          <ul class="footer__links">
-            <li><a href="mailto:contacto@terrae.com">contacto@terrae.com</a></li>
-            <li><a href="tel:+576000000000">+57 (600) 000 0000</a></li>
-            <li>Cali, Colombia</li>
-          </ul>
-        </nav>
-        <nav aria-label="Legal">
-          <div class="footer__titulo">Legal</div>
-          <ul class="footer__links">
-            <li><a href="#">Aviso legal</a></li>
-            <li><a href="#">Política de privacidad</a></li>
-            <li><a href="#">Política de devoluciones</a></li>
-          </ul>
-        </nav>
-      </div>
-      <div class="footer__bottom">
-        <span>© <span data-anio-actual>2026</span> Terrae. Todos los derechos reservados.</span>
-        <span>EmJoy SAS — Colombia</span>
-      </div>
-    </div>
-  </footer>
+        <div class="bo-drawer__pie">
+          <button class="boton boton--secundario" data-accion="cerrar-drawer" type="button">Cancelar</button>
+          <button class="boton boton--esmeralda" data-accion="guardar-drawer" type="submit" form="bo-drawer-form">${escapeHtml(textoGuardar)}</button>
+        </div>
+      </div>`;
+    overlay.classList.add('esta-abierto');
 
-  <script src="js/app.js" defer></script>
-  <script src="js/api.js" defer></script>
-  <script src="js/gallery.js" defer></script>
-</body>
-</html>
+    const cerrar = () => {
+      overlay.classList.remove('esta-abierto');
+      overlay.innerHTML = '';
+    };
+    overlay.querySelectorAll('[data-accion="cerrar-drawer"]').forEach((b) => b.addEventListener('click', cerrar));
+
+    const formulario = overlay.querySelector('#bo-drawer-form');
+    formulario.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      const boton = overlay.querySelector('[data-accion="guardar-drawer"]');
+      boton.disabled = true;
+      const textoOriginal = boton.textContent;
+      boton.textContent = 'Guardando…';
+      try {
+        const datos = Object.fromEntries(new FormData(formulario).entries());
+        await alGuardar(datos, cerrar);
+      } catch (error) {
+        toast(error.message || 'Ocurrió un error al guardar.', 'error');
+      } finally {
+        boton.disabled = false;
+        boton.textContent = textoOriginal;
+      }
+    });
+
+    return { cerrar, formulario };
+  }
+
+  /* -----------------------------------------------------------------------
+     DATATABLE — tabla con búsqueda/orden/paginación mínima reutilizable
+     ----------------------------------------------------------------------- */
+  function renderizarTabla(contenedor, { columnas, filas, filaVacia = 'Sin resultados', porPagina = 10 }) {
+    let paginaActual = 1;
+    let ordenColumna = null;
+    let ordenAsc = true;
+
+    function filasOrdenadas() {
+      if (!ordenColumna) return filas;
+      const copia = [...filas];
+      copia.sort((a, b) => {
+        const va = a[ordenColumna];
+        const vb = b[ordenColumna];
+        if (va === vb) return 0;
+        return (va > vb ? 1 : -1) * (ordenAsc ? 1 : -1);
+      });
+      return copia;
+    }
+
+    function pintar() {
+      const datos = filasOrdenadas();
+      const totalPaginas = Math.max(1, Math.ceil(datos.length / porPagina));
+      paginaActual = Math.min(paginaActual, totalPaginas);
+      const inicio = (paginaActual - 1) * porPagina;
+      const pagina = datos.slice(inicio, inicio + porPagina);
+
+      const encabezados = columnas.map((col) => `
+        <th data-clave="${col.clave}" ${col.ordenable ? `aria-sort="${ordenColumna === col.clave ? (ordenAsc ? 'ascending' : 'descending') : 'none'}"` : ''}>${escapeHtml(col.titulo)}</th>
+      `).join('');
+
+      const cuerpo = pagina.length
+        ? pagina.map((fila) => `<tr>${columnas.map((col) => `<td>${col.render ? col.render(fila) : escapeHtml(fila[col.clave])}</td>`).join('')}</tr>`).join('')
+        : `<tr><td colspan="${columnas.length}" class="bo-tabla__vacio">${escapeHtml(filaVacia)}</td></tr>`;
+
+      contenedor.innerHTML = `
+        <div class="bo-tabla-wrap">
+          <table class="bo-tabla">
+            <thead><tr>${encabezados}</tr></thead>
+            <tbody>${cuerpo}</tbody>
+          </table>
+          <div class="bo-paginacion">
+            <span>${datos.length} registro${datos.length === 1 ? '' : 's'}</span>
+            <div class="bo-paginacion__botones">
+              <button class="bo-tabla__icono-boton" data-pagina="anterior" ${paginaActual === 1 ? 'disabled' : ''} aria-label="Página anterior">‹</button>
+              <span>${paginaActual} / ${totalPaginas}</span>
+              <button class="bo-tabla__icono-boton" data-pagina="siguiente" ${paginaActual === totalPaginas ? 'disabled' : ''} aria-label="Página siguiente">›</button>
+            </div>
+          </div>
+        </div>`;
+
+      contenedor.querySelectorAll('th[data-clave]').forEach((th) => {
+        const columna = columnas.find((c) => c.clave === th.dataset.clave);
+        if (!columna?.ordenable) return;
+        th.addEventListener('click', () => {
+          if (ordenColumna === columna.clave) ordenAsc = !ordenAsc;
+          else { ordenColumna = columna.clave; ordenAsc = true; }
+          pintar();
+        });
+      });
+      contenedor.querySelector('[data-pagina="anterior"]')?.addEventListener('click', () => { paginaActual -= 1; pintar(); });
+      contenedor.querySelector('[data-pagina="siguiente"]')?.addEventListener('click', () => { paginaActual += 1; pintar(); });
+
+      if (typeof renderizarTabla.alPintar === 'function') renderizarTabla.alPintar(contenedor, pagina);
+    }
+
+    pintar();
+  }
+
+  /* -----------------------------------------------------------------------
+     VALIDADORES COMUNES (cliente) — módulo "Validaciones" del prompt
+     ----------------------------------------------------------------------- */
+  const validadores = {
+    requerido: (valor) => (valor !== undefined && valor !== null && String(valor).trim() !== '') || 'Este campo es obligatorio.',
+    numeroPositivo: (valor) => (Number(valor) > 0) || 'Debe ser un número mayor a cero.',
+    longitudMaxima: (max) => (valor) => (String(valor || '').length <= max) || `Máximo ${max} caracteres.`,
+    email: (valor) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor) || 'Correo electrónico inválido.',
+    tipoArchivoPermitido: (archivo, tiposPermitidos) => tiposPermitidos.includes(archivo.type) || 'Tipo de archivo no permitido.',
+    tamanoMaximoMB: (archivo, maxMB) => archivo.size <= maxMB * 1024 * 1024 || `El archivo supera los ${maxMB}MB permitidos.`,
+    async sinDuplicado(valor, listaExistente, campo) {
+      return !listaExistente.some((item) => item[campo] === valor) || 'Ya existe un registro con este valor.';
+    },
+  };
+
+  function validarFormulario(datos, reglas) {
+    const errores = {};
+    Object.entries(reglas).forEach(([campo, listaValidadores]) => {
+      for (const validar of listaValidadores) {
+        const resultado = validar(datos[campo]);
+        if (resultado !== true) {
+          errores[campo] = resultado;
+          break;
+        }
+      }
+    });
+    return { esValido: Object.keys(errores).length === 0, errores };
+  }
+
+  /* -----------------------------------------------------------------------
+     UPLOADER — carga de archivos con validación de tipo/tamaño
+     ----------------------------------------------------------------------- */
+  function inicializarUploader(contenedor, { tiposPermitidos = ['image/jpeg', 'image/png', 'video/mp4'], maxMB = 20, onCambio } = {}) {
+    const archivos = [];
+    contenedor.innerHTML = `
+      <label class="bo-uploader" tabindex="0">
+        <input type="file" multiple accept="${tiposPermitidos.join(',')}">
+        <span>Arrastra archivos aquí o haz clic para seleccionar</span>
+        <span style="display:block;font-size:0.7rem;margin-top:4px;">Fotografías, video · máx. ${maxMB}MB por archivo</span>
+      </label>
+      <ul class="bo-uploader__lista"></ul>`;
+
+    const input = contenedor.querySelector('input[type="file"]');
+    const lista = contenedor.querySelector('.bo-uploader__lista');
+    const label = contenedor.querySelector('.bo-uploader');
+
+    function pintarLista() {
+      lista.innerHTML = archivos.map((archivo, indice) => `
+        <li><span>${escapeHtml(archivo.name)} (${(archivo.size / 1024).toFixed(0)} KB)</span><button type="button" class="bo-uploader__quitar" data-indice="${indice}">Quitar</button></li>
+      `).join('');
+      lista.querySelectorAll('.bo-uploader__quitar').forEach((boton) => {
+        boton.addEventListener('click', () => {
+          archivos.splice(Number(boton.dataset.indice), 1);
+          pintarLista();
+          onCambio?.(archivos);
+        });
+      });
+    }
+
+    function procesarArchivos(listaArchivos) {
+      Array.from(listaArchivos).forEach((archivo) => {
+        const validoTipo = validadores.tipoArchivoPermitido(archivo, tiposPermitidos);
+        const validoTamano = validadores.tamanoMaximoMB(archivo, maxMB);
+        if (validoTipo !== true) return toast(validoTipo, 'error');
+        if (validoTamano !== true) return toast(validoTamano, 'error');
+        archivos.push(archivo);
+      });
+      pintarLista();
+      onCambio?.(archivos);
+    }
+
+    input.addEventListener('change', (evento) => procesarArchivos(evento.target.files));
+    ['dragover', 'dragleave', 'drop'].forEach((evt) => {
+      label.addEventListener(evt, (evento) => {
+        evento.preventDefault();
+        label.classList.toggle('esta-en-arrastre', evt === 'dragover');
+      });
+    });
+    label.addEventListener('drop', (evento) => procesarArchivos(evento.dataTransfer.files));
+
+    return { obtenerArchivos: () => archivos };
+  }
+
+  /* -----------------------------------------------------------------------
+     FORMATO
+     ----------------------------------------------------------------------- */
+  function formatearMoneda(valor, moneda = 'COP') {
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: moneda, maximumFractionDigits: 0 }).format(valor || 0);
+  }
+  function formatearFechaHora(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  return {
+    registrarModulo,
+    irA,
+    inicializarRouter,
+    escapeHtml,
+    toast,
+    confirmar,
+    abrirDrawer,
+    renderizarTabla,
+    validadores,
+    validarFormulario,
+    inicializarUploader,
+    formatearMoneda,
+    formatearFechaHora,
+  };
+})();
+
+/* ---------------------------------------------------------------------------
+   INICIALIZACIÓN DEL SHELL
+   ------------------------------------------------------------------------- */
+document.addEventListener('DOMContentLoaded', () => {
+  const raiz = document.querySelector('[data-pagina="backoffice"]');
+  if (!raiz) return;
+
+  const nombreEl = document.getElementById('bo-usuario-nombre');
+  const rolEl = document.getElementById('bo-usuario-rol');
+  if (nombreEl) nombreEl.textContent = AdminAPI.usuarioSesion.nombre;
+  if (rolEl) rolEl.textContent = AdminAPI.usuarioSesion.rol.replace('_', ' ');
+
+  document.querySelectorAll('.bo-nav__link').forEach((link) => {
+    link.addEventListener('click', () => BO.irA(link.dataset.modulo));
+  });
+
+  const togglesSidebar = document.querySelectorAll('[data-accion="toggle-bo-sidebar"]');
+  const sidebar = document.querySelector('.bo-sidebar');
+  togglesSidebar.forEach((boton) => boton.addEventListener('click', () => sidebar.classList.toggle('esta-abierto')));
+
+  const buscadorGlobal = document.querySelector('#bo-buscador-global-input');
+  if (buscadorGlobal) {
+    buscadorGlobal.addEventListener('keydown', (evento) => {
+      if (evento.key === 'Enter' && buscadorGlobal.value.trim()) {
+        BO.irA('joyas');
+        setTimeout(() => {
+          const inputBusquedaJoyas = document.querySelector('[data-filtro="busqueda"]');
+          if (inputBusquedaJoyas) {
+            inputBusquedaJoyas.value = buscadorGlobal.value.trim();
+            inputBusquedaJoyas.dispatchEvent(new Event('input'));
+          }
+        }, 50);
+      }
+    });
+  }
+
+  BO.inicializarRouter();
+});
